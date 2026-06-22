@@ -1,0 +1,62 @@
+{
+  "id": "default",
+  "role": "实习生",
+  "goals": [
+    "工作可用",
+    "面试笔试",
+    "AI Agent",
+    "软件架构",
+    "产品能力"
+  ],
+  "knownTopics": [
+    {
+      "topic": "agent_core_concepts",
+      "confidence": 0.7,
+      "evidence": "正确识别核心概念",
+      "updatedAt": "2026-06-22T06:34:07.326Z"
+    },
+    {
+      "topic": "agent_safety",
+      "confidence": 0.7,
+      "evidence": "正确识别安全边界",
+      "updatedAt": "2026-06-22T06:34:07.326Z"
+    }
+  ],
+  "weakTopics": [
+    {
+      "topic": "agent_judgment",
+      "confidence": 0.4,
+      "evidence": "未作答",
+      "updatedAt": "2026-06-22T06:34:07.326Z"
+    },
+    {
+      "topic": "agent_patterns",
+      "confidence": 0.4,
+      "evidence": "未作答",
+      "updatedAt": "2026-06-22T06:34:07.326Z"
+    },
+    {
+      "topic": "agent_product_design",
+      "confidence": 0.4,
+      "evidence": "未作答",
+      "updatedAt": "2026-06-22T06:34:07.326Z"
+    }
+  ],
+  "avoidedTopics": [],
+  "preferredStyle": "workbook",
+  "preferredDifficulty": "deep",
+  "topicScores": {
+    "agent_core_concepts": 60,
+    "agent_safety": 60,
+    "agent_judgment": 45,
+    "agent_design": 53,
+    "agent_patterns": 45,
+    "agent_product_design": 45
+  },
+  "behavior": {
+    "streakDays": 0,
+    "missedAnswerDays": 0
+  },
+  "updatedAt": "2026-06-22T06:34:07.358Z",
+  "nextRecommendedTopic": "agent_basics"
+}

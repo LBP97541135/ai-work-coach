@@ -1,0 +1,13 @@
+{
+  "timezone": "Asia/Shanghai",
+  "dailyTime": "13:30",
+  "topicWeights": {
+    "agent": 0.45,
+    "engineering": 0.35,
+    "product": 0.2
+  },
+  "allowFreshSearch": true,
+  "aiProvider": "mock",
+  "model": "gpt-4.1",
+  "updatedAt": ""
+}
