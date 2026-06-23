@@ -1,17 +1,36 @@
 import { Router } from 'express';
-import { readJsonFile, listJsonFiles } from '../storage/JsonStore.js';
-import { getLessonPath, getAnswerPath, getGradingPath, getLessonsDir, getSettingsPath } from '../storage/paths.js';
-import type { Lesson, UserAnswer, GradingResult, Settings } from '../shared/schemas.js';
+import { readJsonFile, writeJsonFile, listJsonFiles } from '../storage/JsonStore.js';
+import { getLessonPath, getAnswerPath, getGradingPath, getLessonsDir, getSettingsPath, getProfilePath } from '../storage/paths.js';
+import type { Lesson, UserAnswer, GradingResult, Settings, UserProfile } from '../shared/schemas.js';
+import { getLocalDate } from '../shared/date.js';
 
 const router = Router();
 
 // GET /api/lessons/today
 router.get('/today', async (_req, res) => {
   try {
-    const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    const date = getLocalDate();
     const lesson = await readJsonFile<Lesson>(getLessonPath(date));
     const answer = await readJsonFile<UserAnswer>(getAnswerPath(date));
     const grading = await readJsonFile<GradingResult>(getGradingPath(date));
+
+    // 记录打开行为（同一天只记录一次）
+    if (lesson) {
+      const profile = await readJsonFile<UserProfile>(getProfilePath());
+      if (profile) {
+        const today = getLocalDate();
+        const recentOpenDates = profile.behavior.recentOpenDates || [];
+        if (!recentOpenDates.includes(today)) {
+          recentOpenDates.push(today);
+          // 保留最近14天
+          profile.behavior.recentOpenDates = recentOpenDates.slice(-14);
+          profile.behavior.lastOpenedAt = new Date().toISOString();
+          profile.behavior.lastLessonStatus = lesson.status;
+          await writeJsonFile(getProfilePath(), profile);
+        }
+      }
+    }
+
     res.json({ lesson, answer, grading });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -48,7 +67,7 @@ router.get('/', async (req, res) => {
 router.post('/generate', async (req, res) => {
   try {
     const { date: reqDate, force } = req.body;
-    const date = reqDate || new Date().toISOString().split('T')[0];
+    const date = reqDate || getLocalDate();
 
     // 动态导入以避免循环依赖
     const { generateTodayLesson } = await import('../core/lessonPlanner.js');

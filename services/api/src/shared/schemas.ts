@@ -135,10 +135,15 @@ export type UserProfile = {
   topicScores: Record<string, number>;
   behavior: {
     lastOpenedAt?: ISODateTime;
+    lastDraftUpdatedAt?: ISODateTime;
     lastAnsweredAt?: ISODateTime;
+    lastSubmittedAt?: ISODateTime;
     streakDays: number;
     missedAnswerDays: number;
     averageAnswerDepth?: number;
+    recentOpenDates?: ISODate[];
+    recentSubmitDates?: ISODate[];
+    lastLessonStatus?: LessonStatus;
   };
   nextRecommendedTopic?: string;
   updatedAt: ISODateTime;

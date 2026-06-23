@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import { readJsonFile, writeJsonFile, appendEventLog, listJsonFiles } from '../storage/JsonStore.js';
-import { getLessonPath, getAnswerPath, getGradingPath, getEventLogPath, getLessonsDir, getSettingsPath } from '../storage/paths.js';
-import type { Lesson, UserAnswer, GradingResult, Settings } from '../shared/schemas.js';
+import { getLessonPath, getAnswerPath, getGradingPath, getEventLogPath, getLessonsDir, getSettingsPath, getProfilePath } from '../storage/paths.js';
+import type { Lesson, UserAnswer, GradingResult, Settings, UserProfile } from '../shared/schemas.js';
+import { getLocalDate } from '../shared/date.js';
 
 const router = Router();
 
@@ -56,6 +57,14 @@ router.put('/:lessonId/answers', async (req, res) => {
       type: 'answer.draft_saved',
       lessonId,
     });
+
+    // 更新行为画像
+    const profile = await readJsonFile<UserProfile>(getProfilePath());
+    if (profile) {
+      profile.behavior.lastDraftUpdatedAt = now;
+      profile.behavior.lastLessonStatus = 'draft';
+      await writeJsonFile(getProfilePath(), profile);
+    }
 
     res.json(answer);
   } catch (error: any) {
@@ -120,6 +129,35 @@ router.post('/:lessonId/submit', async (req, res) => {
       lessonId,
       score: grading.score,
     });
+
+    // 更新行为画像
+    const profile = await readJsonFile<UserProfile>(getProfilePath());
+    if (profile) {
+      const today = getLocalDate();
+      const recentSubmitDates = profile.behavior.recentSubmitDates || [];
+      recentSubmitDates.push(today);
+      profile.behavior.recentSubmitDates = [...new Set(recentSubmitDates)].slice(-14);
+      profile.behavior.lastSubmittedAt = new Date().toISOString();
+      profile.behavior.lastAnsweredAt = new Date().toISOString();
+      profile.behavior.lastLessonStatus = 'graded';
+
+      // 计算连续学习天数
+      const sortedDates = [...profile.behavior.recentSubmitDates].sort().reverse();
+      let streak = 0;
+      const checkDate = new Date(today);
+      for (const d of sortedDates) {
+        const expected = checkDate.toISOString().split('T')[0];
+        if (d === expected) {
+          streak++;
+          checkDate.setDate(checkDate.getDate() - 1);
+        } else {
+          break;
+        }
+      }
+      profile.behavior.streakDays = streak;
+
+      await writeJsonFile(getProfilePath(), profile);
+    }
 
     res.json({ answer, grading });
   } catch (error: any) {

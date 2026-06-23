@@ -1,0 +1,19 @@
+{
+  "sources": [
+    {
+      "title": "OpenAI Function Calling 最佳实践",
+      "url": "https://platform.openai.com/docs/guides/function-calling",
+      "note": "OpenAI 官方 Function Calling 文档，涵盖参数定义、并行调用和流式处理"
+    },
+    {
+      "title": "LangChain Agent 模式文档",
+      "url": "https://python.langchain.com/docs/concepts/agents/",
+      "note": "LangChain Agent 概念文档，涵盖 ReAct、Plan-and-Execute 等模式"
+    },
+    {
+      "title": "Anthropic: Building effective agents",
+      "url": "https://www.anthropic.com/research/building-effective-agents",
+      "note": "Anthropic 关于构建有效 Agent 的实践指南"
+    }
+  ]
+}

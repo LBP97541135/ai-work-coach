@@ -3,6 +3,67 @@ import type { AIProvider, GenerateLessonInput, GradeAnswersInput } from './AIPro
 import type { Lesson, GradingResult } from '../shared/schemas.js';
 import { buildGenerateLessonPrompt, buildGradeAnswersPrompt } from './prompts.js';
 
+/**
+ * 校验 Lesson 结构是否合法
+ */
+export function validateLessonStructure(data: any): string[] {
+  const errors: string[] = [];
+  if (!data.title || typeof data.title !== 'string') errors.push('missing/invalid title');
+  if (!data.category || !['agent', 'engineering', 'product', 'mixed'].includes(data.category)) errors.push('missing/invalid category');
+  if (!data.difficulty || !['basic', 'intermediate', 'advanced'].includes(data.difficulty)) errors.push('missing/invalid difficulty');
+  if (!Array.isArray(data.sections) || data.sections.length === 0) errors.push('missing/empty sections');
+  if (!Array.isArray(data.questions) || data.questions.length === 0) errors.push('missing/empty questions');
+
+  // 校验 sections
+  if (Array.isArray(data.sections)) {
+    for (let i = 0; i < data.sections.length; i++) {
+      const s = data.sections[i];
+      if (!s.title) errors.push(`sections[${i}].title missing`);
+      if (!s.kind || !['core', 'scenario', 'pitfall', 'workflow', 'summary'].includes(s.kind)) errors.push(`sections[${i}].kind invalid`);
+      if (!s.markdown) errors.push(`sections[${i}].markdown missing`);
+    }
+  }
+
+  // 校验 questions
+  if (Array.isArray(data.questions)) {
+    for (let i = 0; i < data.questions.length; i++) {
+      const q = data.questions[i];
+      if (!q.type) errors.push(`questions[${i}].type missing`);
+      if (!q.prompt) errors.push(`questions[${i}].prompt missing`);
+      if (['single_choice', 'multiple_choice'].includes(q.type) && (!Array.isArray(q.options) || q.options.length === 0)) {
+        errors.push(`questions[${i}].options missing for choice type`);
+      }
+    }
+  }
+
+  return errors;
+}
+
+/**
+ * 校验 GradingResult 结构是否合法
+ */
+export function validateGradingStructure(data: any): string[] {
+  const errors: string[] = [];
+  if (!data.overall || typeof data.overall !== 'string') errors.push('missing/invalid overall');
+  if (typeof data.score !== 'number') errors.push('missing/invalid score');
+  if (!Array.isArray(data.questionFeedback) || data.questionFeedback.length === 0) errors.push('missing/empty questionFeedback');
+  if (!Array.isArray(data.strengths)) errors.push('missing strengths');
+  if (!Array.isArray(data.weaknesses)) errors.push('missing weaknesses');
+
+  // 校验 questionFeedback
+  if (Array.isArray(data.questionFeedback)) {
+    for (let i = 0; i < data.questionFeedback.length; i++) {
+      const fb = data.questionFeedback[i];
+      if (!fb.verdict || !['correct', 'partially_correct', 'incorrect', 'open_ended'].includes(fb.verdict)) {
+        errors.push(`questionFeedback[${i}].verdict invalid`);
+      }
+      if (!fb.feedback) errors.push(`questionFeedback[${i}].feedback missing`);
+    }
+  }
+
+  return errors;
+}
+
 export class OpenAIProvider implements AIProvider {
   private client: OpenAI;
   private model: string;
@@ -35,6 +96,13 @@ export class OpenAIProvider implements AIProvider {
     });
 
     const parsed = JSON.parse(response);
+
+    // Schema 校验
+    const errors = validateLessonStructure(parsed);
+    if (errors.length > 0) {
+      throw new Error(`Lesson schema validation failed: ${errors.join(', ')}`);
+    }
+
     return this.validateAndFillLesson(parsed, input.date);
   }
 
@@ -59,6 +127,13 @@ export class OpenAIProvider implements AIProvider {
     });
 
     const parsed = JSON.parse(response);
+
+    // Schema 校验
+    const errors = validateGradingStructure(parsed);
+    if (errors.length > 0) {
+      throw new Error(`Grading schema validation failed: ${errors.join(', ')}`);
+    }
+
     return this.validateAndFillGrading(parsed, input.lesson.id);
   }
 

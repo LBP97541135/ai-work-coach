@@ -1,4 +1,4 @@
-import type { Lesson, LessonCategory, Difficulty, UserAnswer, GradingResult, UserProfile } from '../shared/schemas.js';
+import type { Lesson, LessonCategory, Difficulty, UserAnswer, GradingResult, UserProfile, SourceNote } from '../shared/schemas.js';
 
 export type GenerateLessonInput = {
   date: string;
@@ -7,6 +7,7 @@ export type GenerateLessonInput = {
   userProfile: UserProfile;
   recentTopics: string[];
   reason: string;
+  sourceNotes?: SourceNote[];
 };
 
 export type GradeAnswersInput = {

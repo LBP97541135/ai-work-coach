@@ -1,5 +1,7 @@
-import type { Lesson, LessonCategory, UserProfile, Settings } from '../shared/schemas.js';
+import type { Lesson, LessonCategory, UserProfile, Settings, SourceNote } from '../shared/schemas.js';
 import type { AIProvider, GenerateLessonInput } from '../ai/AIProvider.js';
+import type { FreshSourceProvider } from '../ai/FreshSourceProvider.js';
+import { StaticFreshSourceProvider } from '../ai/StaticFreshSourceProvider.js';
 import { readJsonFile, writeJsonFile, listJsonFiles, appendEventLog } from '../storage/JsonStore.js';
 import { getLessonPath, getSettingsPath, getProfilePath, getLessonsDir, getEventLogPath } from '../storage/paths.js';
 import { generateLessonId } from '../shared/ids.js';
@@ -90,7 +92,8 @@ async function getRecentTopics(limit: number = 5): Promise<string[]> {
 export async function generateTodayLesson(
   provider: AIProvider,
   date: string,
-  force: boolean = false
+  force: boolean = false,
+  freshSourceProvider?: FreshSourceProvider
 ): Promise<Lesson> {
   // 检查当天是否已有 lesson
   const existingLesson = await readJsonFile<Lesson>(getLessonPath(date));
@@ -113,6 +116,24 @@ export async function generateTodayLesson(
   // 生成原因
   const reason = `根据你的学习画像，今日重点学习 ${category} 方向的内容。主题评分: ${score.toFixed(2)}`;
 
+  // 获取新近资料源
+  let sourceNotes: SourceNote[] = [];
+  if (settings.allowFreshSearch) {
+    const fsProvider = freshSourceProvider || new StaticFreshSourceProvider();
+    try {
+      sourceNotes = await fsProvider.fetchSources({
+        category,
+        date,
+        limit: 3,
+      });
+    } catch {
+      sourceNotes = [{
+        title: "资料源获取失败",
+        note: "本次训练内容基于 AI 模型知识生成，未联网验证/资料源获取失败",
+      }];
+    }
+  }
+
   // 调用 AI Provider
   const input: GenerateLessonInput = {
     date,
@@ -121,6 +142,7 @@ export async function generateTodayLesson(
     userProfile: profile,
     recentTopics,
     reason,
+    sourceNotes,
   };
 
   const lesson = await provider.generateLesson(input);

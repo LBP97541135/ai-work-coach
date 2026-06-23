@@ -1,0 +1,19 @@
+{
+  "sources": [
+    {
+      "title": "System Design Primer",
+      "url": "https://github.com/donnemartin/system-design-primer",
+      "note": "开源系统设计学习资源，涵盖常见系统设计问题和解决方案"
+    },
+    {
+      "title": "AWS Architecture Well-Architected Framework",
+      "url": "https://aws.amazon.com/architecture/well-architected/",
+      "note": "AWS 架构最佳实践框架，涵盖可靠性、性能效率等六大支柱"
+    },
+    {
+      "title": "Martin Fowler: Patterns of Enterprise Application Architecture",
+      "url": "https://martinfowler.com/books/eaa.html",
+      "note": "企业应用架构模式经典参考"
+    }
+  ]
+}

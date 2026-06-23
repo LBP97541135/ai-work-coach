@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { readJsonFile, writeJsonFile, appendEventLog } from '../storage/JsonStore.js';
 import { getSettingsPath, getEventLogPath } from '../storage/paths.js';
 import type { Settings } from '../shared/schemas.js';
+import { getLocalDate } from '../shared/date.js';
 
 const router = Router();
 
@@ -27,7 +28,7 @@ router.put('/', async (req, res) => {
     }
     const updated = { ...settings, ...req.body, updatedAt: new Date().toISOString() };
     await writeJsonFile(getSettingsPath(), updated);
-    await appendEventLog(getEventLogPath(new Date().toISOString()), {
+    await appendEventLog(getEventLogPath(getLocalDate()), {
       time: new Date().toISOString(),
       type: 'settings.updated',
     });

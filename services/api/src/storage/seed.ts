@@ -30,6 +30,8 @@ const DEFAULT_PROFILE: UserProfile = {
   behavior: {
     streakDays: 0,
     missedAnswerDays: 0,
+    recentOpenDates: [],
+    recentSubmitDates: [],
   },
   updatedAt: "",
 };

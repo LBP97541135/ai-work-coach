@@ -3,6 +3,7 @@ import { readJsonFile } from '../storage/JsonStore.js';
 import { getSettingsPath } from '../storage/paths.js';
 import type { Settings } from '../shared/schemas.js';
 import type { AIProvider } from '../ai/AIProvider.js';
+import { getLocalDate } from '../shared/date.js';
 
 let scheduledTask: cron.ScheduledTask | null = null;
 
@@ -34,13 +35,15 @@ export async function startScheduler(provider: AIProvider): Promise<void> {
   scheduledTask = cron.schedule(cronExpression, async () => {
     try {
       const { generateTodayLesson } = await import('./lessonPlanner.js');
-      const date = new Date().toISOString().split('T')[0];
+      const date = getLocalDate();
       console.log(`Scheduler: generating lesson for ${date}...`);
       await generateTodayLesson(provider, date, false);
       console.log(`Scheduler: lesson generated for ${date}`);
     } catch (error: any) {
       console.error('Scheduler: failed to generate lesson:', error.message);
     }
+  }, {
+    timezone: "Asia/Shanghai"
   });
 
   scheduledTask.start();

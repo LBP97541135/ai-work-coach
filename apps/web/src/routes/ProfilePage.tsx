@@ -28,6 +28,16 @@ export default function ProfilePage() {
       </div>
 
       <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
+        <h2 className="font-semibold text-gray-800 mb-2">最近学习情况</h2>
+        <div className="grid grid-cols-2 gap-2 text-sm">
+          <div><span className="text-gray-500">连续学习：</span>{profile.behavior.streakDays} 天</div>
+          <div><span className="text-gray-500">上次打开：</span>{profile.behavior.lastOpenedAt ? new Date(profile.behavior.lastOpenedAt).toLocaleDateString('zh-CN') : '无'}</div>
+          <div><span className="text-gray-500">上次提交：</span>{profile.behavior.lastSubmittedAt ? new Date(profile.behavior.lastSubmittedAt).toLocaleDateString('zh-CN') : '无'}</div>
+          <div><span className="text-gray-500">最近打开天数：</span>{profile.behavior.recentOpenDates?.length || 0} 天</div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
         <h2 className="font-semibold text-gray-800 mb-2">学习目标</h2>
         <div className="flex flex-wrap gap-2">
           {profile.goals.map((g, i) => (
@@ -54,14 +64,14 @@ export default function ProfilePage() {
       </div>
 
       <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
-        <h2 className="font-semibold text-red-700 mb-2">薄弱点</h2>
+        <h2 className="font-semibold text-amber-700 mb-2">建议补强</h2>
         {profile.weakTopics.length === 0 ? (
           <p className="text-gray-400 text-sm">暂无数据</p>
         ) : (
           <ul className="space-y-1">
             {profile.weakTopics.map((t, i) => (
               <li key={i} className="flex items-center gap-2 text-sm">
-                <span className="text-red-600">●</span>
+                <span className="text-amber-500">●</span>
                 <span>{t.topic}</span>
                 <span className="text-gray-400">({(t.confidence * 100).toFixed(0)}%)</span>
               </li>
